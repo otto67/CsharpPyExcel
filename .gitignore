@@ -1,0 +1,8 @@
+Resources/
+ExcelInterface*
+*.resx
+properties/
+Resources/
+bin/
+obj/
+nodevals.txt
