@@ -16,7 +16,11 @@ namespace ExcelInterface
 
     public partial class Form1 : Form
     {
-        private const string pythonFileToRun = @"C:\Users\otto_\source\repos\ExcelInterface\Runsim.py";
+        private readonly string pythonFileToRun = System.IO.Directory.GetParent(System.IO.Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory)).Parent.FullName + 
+            System.IO.Path.DirectorySeparatorChar + "RunSim.py";
+
+        private readonly string inputFile = System.IO.Directory.GetParent(System.IO.Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory)).Parent.FullName +
+            System.IO.Path.DirectorySeparatorChar + "input.txt";
 
         public Form1()
         {
@@ -35,6 +39,7 @@ namespace ExcelInterface
 
         private void RunSim()
         {
+            
             RunSimulator();
             PlotResults();
         }
@@ -89,12 +94,14 @@ namespace ExcelInterface
                 myWB = (Excel.Workbook)(myXL.Workbooks.Add(Missing.Value));
                 resultSheet = (Excel.Worksheet)myXL.Worksheets.Add();
                 resultSheet.Name = "Result data";
-                
                 inputSheet = (Excel.Worksheet)myXL.Worksheets.Add();
+                inputSheet.Name = "Input data";
+
 
                 // Read results from file written by Python solver                                
                 ReadResults(resultSheet);
                 
+                // Read input from input file
                 ReadInput(inputSheet);
 
                 CreatePlot(resultSheet);
@@ -116,14 +123,20 @@ namespace ExcelInterface
                 errorMessage = String.Concat(errorMessage, theException.Message);
                 errorMessage = String.Concat(errorMessage, " Line: ");
                 errorMessage = String.Concat(errorMessage, theException.Source);
-                
+
+                if (plotSheet != null) System.Runtime.InteropServices.Marshal.ReleaseComObject(plotSheet);
+                if (resultSheet != null) System.Runtime.InteropServices.Marshal.ReleaseComObject(resultSheet);
+                if (inputSheet != null) System.Runtime.InteropServices.Marshal.ReleaseComObject(inputSheet);
                 if (myWB != null) System.Runtime.InteropServices.Marshal.ReleaseComObject(myWB);
                 if (myXL != null)
                 {
                     myXL.Quit();
                     System.Runtime.InteropServices.Marshal.ReleaseComObject(myXL);
                 }
-                
+
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+
                 MessageBox.Show(errorMessage, "Error");
             }
         }
@@ -255,33 +268,25 @@ namespace ExcelInterface
         private void ReadInput(Excel.Worksheet inputSheet)
         {
             Excel.Range myRange = null;
-            String myFile = @"C:\Users\otto_\source\repos\ExcelInterface\input.txt";
-            string[] lines = System.IO.File.ReadAllLines(myFile);
+            
+            string[] lines = System.IO.File.ReadAllLines(inputFile);
 
-            inputSheet.Cells[2, 2]= "Input data for Poisson solver";
+            inputSheet.Cells[1, 1]= "Input data for Poisson solver";
 
-            myRange = inputSheet.get_Range("B2", "D2");
-            myRange.BorderAround(Excel.XlLineStyle.xlContinuous, Excel.XlBorderWeight.xlMedium, Excel.XlColorIndex.xlColorIndexAutomatic,System.Drawing.Color.Red);
-            myRange.Interior.ColorIndex = 4;
+            myRange = inputSheet.get_Range("A1", "F14");
+            myRange.BorderAround(Excel.XlLineStyle.xlContinuous, Excel.XlBorderWeight.xlThick, Excel.XlColorIndex.xlColorIndexAutomatic);
+            myRange.Interior.ColorIndex = 3;
 
 
-            myRange = inputSheet.get_Range("B2", "D11");
-            myRange.Interior.ColorIndex = 8;
+            myRange = inputSheet.get_Range("B3", "E13");
             myRange.BorderAround(Excel.XlLineStyle.xlContinuous, Excel.XlBorderWeight.xlMedium, Excel.XlColorIndex.xlColorIndexAutomatic);
+            myRange.Interior.ColorIndex = 6;
 
             for (int i = 0; i < lines.Length; i++){
-
                 string[] nums = lines[i].Split(':');
                 inputSheet.Cells[i + 3, 2] = nums[0];
                 inputSheet.Cells[i + 3, 4] = nums[1];
-                inputSheet.Name = "Input data";
             }
-
-
-
-
-
-
         }
 
         private void OperCombo_Click(object sender, EventArgs e)

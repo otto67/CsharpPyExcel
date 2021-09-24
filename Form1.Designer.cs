@@ -78,8 +78,8 @@ namespace ExcelInterface
             // menuStrip1
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripMenuItem1,
-            this.OperCombo});
+            this.OperCombo,
+            this.toolStripMenuItem1});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Size = new System.Drawing.Size(800, 27);
@@ -95,8 +95,8 @@ namespace ExcelInterface
             this.toolStripSeparator2,
             this.toolStripComboBox3});
             this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(66, 23);
-            this.toolStripMenuItem1.Text = "Test func";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(39, 23);
+            this.toolStripMenuItem1.Text = "Test";
             // 
             // toolStripComboBox1
             // 
@@ -142,9 +142,8 @@ namespace ExcelInterface
             // 
             this.OperCombo.Items.AddRange(new object[] {
             "Run",
-            "Plot1",
-            "Plot2",
-            "Plot3"});
+            "List input",
+            "Write input"});
             this.OperCombo.Name = "OperCombo";
             this.OperCombo.Size = new System.Drawing.Size(121, 23);
             this.OperCombo.Text = "Operation";
