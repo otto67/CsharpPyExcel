@@ -4,6 +4,6 @@ rhs_coeff:12
 Number of nodes:400
 Method of solution:FDM
 bclow:0
-bcupp:0
+bcupp:1
 bcleft:0
-bcright:0
+bcright:2

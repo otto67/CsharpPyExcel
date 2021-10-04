@@ -21,28 +21,19 @@ namespace ExcelInterface
 
         private readonly string inputFile = System.IO.Directory.GetParent(System.IO.Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory)).Parent.FullName +
             System.IO.Path.DirectorySeparatorChar + "input.txt";
+        private readonly string resultsFile = System.IO.Directory.GetParent(System.IO.Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory)).Parent.FullName +
+            System.IO.Path.DirectorySeparatorChar + "nodevals.txt";
 
         public Form1()
         {
             InitializeComponent();
         }
 
-        private void CreateButton_Click(object sender, EventArgs e)
-        {
-            RunSim();
-        }      
+        private void CreateButton_Click(object sender, EventArgs e){ RunSim(); }      
         
-        private void pictureBox1_Click(object sender, EventArgs e)
-        {
-            
-        }
+        private void pictureBox1_Click(object sender, EventArgs e){}
 
-        private void RunSim()
-        {
-            
-            RunSimulator();
-            PlotResults();
-        }
+        private void RunSim(){ RunSimulator(); PlotResults(); }
 
         private void RunSimulator()
         {
@@ -247,14 +238,13 @@ namespace ExcelInterface
 
         private void ReadResults(Excel.Worksheet resultSheet)
         {
-            String myFile = @"C:\Users\otto_\source\repos\ExcelInterface\nodevals.txt";
-
+            
             // Avoid trouble with wrong format floating point numbers
             System.Globalization.CultureInfo ci = (System.Globalization.CultureInfo)System.Globalization.CultureInfo.CurrentCulture.Clone();
             ci.NumberFormat.NumberDecimalSeparator = ".";
             ci.NumberFormat.CurrencyDecimalSeparator = ".";
 
-            string[] lines = System.IO.File.ReadAllLines(myFile);
+            string[] lines = System.IO.File.ReadAllLines(resultsFile);
 
             for (int i = 0; i < lines.Length; i++){
                 
@@ -289,10 +279,38 @@ namespace ExcelInterface
             }
         }
 
-        private void OperCombo_Click(object sender, EventArgs e)
+
+        private void DisplayInput()
         {
-           
+            string[] lines = System.IO.File.ReadAllLines(inputFile);
+
+            string output = "Input data for Poisson solver \r\n";
+            
+            foreach (var line in lines)
+                output += "\r\n" + line;
+
+            this.outputBox.Text = output;            
         }
+
+        private void SaveInput()
+        {
+            System.IO.TextReader read = new System.IO.StringReader(outputBox.Text);
+
+            string input;
+            var output = new List<string>();
+            
+            for (int i = 0; i < outputBox.Lines.Length; i++)
+            {
+                input = read.ReadLine();
+                if ((input != null) && (input.Split(':').Length == 2))
+                    output.Add(input);
+            }
+
+            
+            System.IO.File.WriteAllLines(inputFile, (string []) output.ToArray());
+        }
+
+        private void OperCombo_Click(object sender, EventArgs e){}
 
         private void OperCombo_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -305,12 +323,13 @@ namespace ExcelInterface
 
             if (selected == "Run")
                 RunSim();
+            else if (selected == "List input")
+                DisplayInput();
+            else if (selected == "Save input")
+                SaveInput();
         }
 
-        private void label1_Click(object sender, EventArgs e)
-        {
-
-        }
+        private void label1_Click(object sender, EventArgs e){}
     }
  }
 

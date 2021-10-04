@@ -143,7 +143,7 @@ namespace ExcelInterface
             this.OperCombo.Items.AddRange(new object[] {
             "Run",
             "List input",
-            "Write input"});
+            "Save input"});
             this.OperCombo.Name = "OperCombo";
             this.OperCombo.Size = new System.Drawing.Size(121, 23);
             this.OperCombo.Text = "Operation";
