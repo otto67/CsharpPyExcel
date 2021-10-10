@@ -16,11 +16,16 @@ namespace ExcelInterface
 
     public partial class Form1 : Form
     {
+        // Note:  Avoid hardcoding the path
+        private readonly string pythonExe = @"C:\Users\otto_\winpython\python.exe";
+
+        // Python program to be run. 
         private readonly string pythonFileToRun = System.IO.Directory.GetParent(System.IO.Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory)).Parent.FullName + 
             System.IO.Path.DirectorySeparatorChar + "RunSim.py";
-
+        // Input file to initialize Python program. Located in base directory
         private readonly string inputFile = System.IO.Directory.GetParent(System.IO.Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory)).Parent.FullName +
             System.IO.Path.DirectorySeparatorChar + "input.txt";
+        // Results file created by Python
         private readonly string resultsFile = System.IO.Directory.GetParent(System.IO.Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory)).Parent.FullName +
             System.IO.Path.DirectorySeparatorChar + "nodevals.txt";
 
@@ -35,16 +40,18 @@ namespace ExcelInterface
 
         private void RunSim(){ RunSimulator(); PlotResults(); }
 
+        /// <summary>
+        /// Runs the Python simulator.
+        /// </summary>
         private void RunSimulator()
         {
             this.outputBox.Text = "";
 
-            string progName = @"C:\Users\otto_\winpython\python.exe";
             try
             {
                 System.Diagnostics.Process p = new System.Diagnostics.Process();
 
-                p.StartInfo = new System.Diagnostics.ProcessStartInfo(progName, pythonFileToRun)
+                p.StartInfo = new System.Diagnostics.ProcessStartInfo(pythonExe, pythonFileToRun)
                 {
                     RedirectStandardOutput = true,
                     UseShellExecute = false,
@@ -68,8 +75,14 @@ namespace ExcelInterface
                 errorMessage = String.Concat(errorMessage, exc.Message);
                 errorMessage = String.Concat(errorMessage, " Line: ");
                 errorMessage = String.Concat(errorMessage, exc.Source);
+
+                MessageBox.Show(errorMessage);
             }
         }
+
+        /// <summary>
+        /// Plots results read from file created by Python simulator
+        /// </summary>
         private void PlotResults()
         {
             Excel.Application myXL = null;
@@ -89,14 +102,17 @@ namespace ExcelInterface
                 inputSheet.Name = "Input data";
 
 
-                // Read results from file written by Python solver                                
+                // Reads results  file                                 
                 ReadResults(resultSheet);
                 
-                // Read input from input file
+                // Reads input from input file
                 ReadInput(inputSheet);
 
+                // Creates plot
                 CreatePlot(resultSheet);
 
+
+                // Delete unwanted sheets
                 for (int i = myXL.ActiveWorkbook.Worksheets.Count; i > 0; i--){
                     
                     Excel.Worksheet wkSheet = (Excel.Worksheet)myXL.ActiveWorkbook.Worksheets[i];
@@ -132,12 +148,16 @@ namespace ExcelInterface
             }
         }
 
+        /// <summary>
+        /// Creates actual plots
+        /// </summary>
+        /// <param name="dataSheet"> Contains the (properly formatted) results from the Python simulator</param>
         private void CreatePlot(Excel.Worksheet dataSheet)
         {
             Excel.ChartObjects chartObjs = null;
-            Excel.ChartObject chartObj = null;
-            Excel.ChartObject chartObjTV = null;
-            Excel.ChartObject chartObjWF = null;
+            Excel.ChartObject chartObj = null;   // Surface plot 
+            Excel.ChartObject chartObjTV = null; //  Top view
+            Excel.ChartObject chartObjWF = null; // Wire frame
             Excel.Chart xlChart = null;
             Excel.Chart xlChartTV = null;
             Excel.Chart xlChartWF = null;
@@ -161,12 +181,13 @@ namespace ExcelInterface
 
                 dataSheet.Cells[1, 1] = ""; // Avoid artifacts in plot
 
+                // Find results section 
                 string upperLeftCell = "A1";
                 var endRowNumber = nRows + 1;
                 char endColumnLetter = (char)('A' + endRowNumber - 1);
                 string lowerRightCell = $"{endColumnLetter}{endRowNumber}";
 
-
+                // Select result data
                 chartRng = dataSheet.get_Range(upperLeftCell, lowerRightCell);
 
                 xlChart.SetSourceData(chartRng, Type.Missing);
@@ -220,6 +241,7 @@ namespace ExcelInterface
                 xlChartWF.Location(Excel.XlChartLocation.xlLocationAsNewSheet, "Wire frame view");
                 xlChart.Location(Excel.XlChartLocation.xlLocationAsNewSheet, "Side view");
             }
+            // Catch exception ? 
             finally
             {
                 if (chartRng != null) System.Runtime.InteropServices.Marshal.ReleaseComObject(chartRng);
@@ -236,6 +258,10 @@ namespace ExcelInterface
             }
         }
 
+        /// <summary>
+        /// Reads results from file into data sheet
+        /// </summary>
+        /// <param name="resultSheet">Sheet to be filed with results data</param>
         private void ReadResults(Excel.Worksheet resultSheet)
         {
             
@@ -255,6 +281,10 @@ namespace ExcelInterface
             }
         }
 
+        /// <summary>
+        /// Reads input data from file and writes to input shees
+        /// </summary>
+        /// <param name="inputSheet">Data sheet for displaying input data used in simulation</param>
         private void ReadInput(Excel.Worksheet inputSheet)
         {
             Excel.Range myRange = null;
@@ -279,7 +309,9 @@ namespace ExcelInterface
             }
         }
 
-
+        /// <summary>
+        /// Displays input data read from the input file in a text box. These data can be edited by the user 
+        /// </summary>
         private void DisplayInput()
         {
             string[] lines = System.IO.File.ReadAllLines(inputFile);
@@ -292,6 +324,9 @@ namespace ExcelInterface
             this.outputBox.Text = output;            
         }
 
+        /// <summary>
+        /// Write (possibly user-edited) contents of text box into input file.
+        /// </summary>
         private void SaveInput()
         {
             System.IO.TextReader read = new System.IO.StringReader(outputBox.Text);
@@ -312,6 +347,11 @@ namespace ExcelInterface
 
         private void OperCombo_Click(object sender, EventArgs e){}
 
+        /// <summary>
+        /// Takes appropriate action according to the item selected
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void OperCombo_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (OperCombo.SelectedIndex < 0)

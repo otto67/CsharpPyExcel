@@ -1,15 +1,21 @@
 from genericpath import exists
 import sys, os
+# Reuse simulator
 import Simulator
 import numpy as np
-
-# Reuse simulator
-
 import pathlib
 
 
 def readFromFile(filename):
+    """[summary]
+    Reads input data for simulator from file
 
+    Args:
+        filename ([type]): File to be read
+
+    Returns:
+        List: List of values being input to simulator  
+    """
     return_list = []
     try: 
         file = open(filename, 'r')
@@ -33,14 +39,9 @@ def readFromFile(filename):
         return return_list
 
 def solve():
-
-    # fname = os.path.join(pathlib.Path().resolve(), "input.txt")
-    # os.path.abspath(os.getcwd()) This will also work on python 2
-    
+    """ Runs simulator 
+    """   
     fname = os.path.join(os.path.dirname(os.path.abspath(__file__)),'input.txt')
-
-    
-    print("Reading input from " + fname + "\n")
 
     x_min = y_min = x_max = y_max = 0
 
@@ -49,6 +50,7 @@ def solve():
             f = open(fname, "r")
             mylist = readFromFile(fname)
     
+        # Extract domain for use when writing results to file    
         for input in mylist:
             if input.split(':')[0].lower() == "domain":
                 (x_min, x_max, y_min, y_max) = Simulator.parse_domain(input.split(':')[1])
@@ -60,7 +62,9 @@ def solve():
             y_max = 1
             y_min = 0
 
-    # writeToFile()
+        # Test function. To be removed 
+        # writeToFile()
+        
         sol = Simulator.run(mylist)
         writeNodeValsToFile(sol, x_max, x_min, y_max, y_min)
     except Exception as e:
@@ -69,9 +73,16 @@ def solve():
 
 def writeNodeValsToFile(solution, xmax, xmin, ymax, ymin):
     
-#    filename = os.path.join(os.path.abspath(os.getcwd()),'nodevals.txt')
+    """ Write node values to file 
+
+    Args:
+        solution (2d numpy array): Nodal values of solution
+        xmax (float): Right boundary
+        xmin (float): Left boundary
+        ymax (float): Upper boundary
+        ymin (float): Lower boundary
+    """    
     filename = os.path.join(os.path.dirname(os.path.abspath(__file__)),'nodevals.txt')
-    print("Writing nodal values to file ", filename)
 
     dx = (float) ((xmax - xmin)/(solution.shape[0]-1))
     dy = (float) ((ymax - ymin)/(solution.shape[1]-1))
@@ -131,7 +142,4 @@ def writeToFile():
     f.close()
 
 if (__name__ == "__main__"):
-
-    print("Starting Runsim \n")
     solve() 
-
